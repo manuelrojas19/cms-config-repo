@@ -1,0 +1,103 @@
+version: '3.9'
+services:
+  #  postgres:
+  #    image: postgres
+  #    restart: unless-stopped
+  #    ports:
+  #      - "5433:5432"
+  #    networks:
+  #      - commissions-network
+  #    environment:
+  #      POSTGRES_USER: postgres
+  #      POSTGRES_PASSWORD: postgres
+  #  mongo:
+  #    image: mongo
+  #    restart: unless-stopped
+  #    ports:
+  #      - "27888:27017"
+  #    networks:
+  #      - commissions-network
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - commissions-network
+  discovery-service:
+    image: discovery-service:0.0.1-SNAPSHOT
+    ports:
+      - "8761:8761"
+    networks:
+      - commissions-network
+  config-server:
+    image: config-server:0.0.1-SNAPSHOT
+    ports:
+      - "8888:8888"
+    depends_on:
+      - discovery-service
+    networks:
+      - commissions-network
+    environment:
+      eureka.client.serviceURL.defaultZone: http://discovery-service:8761/eureka
+      eureka.instance.prefer-ip-address: "true"
+  employees_service:
+    image: employees-service:0.0.1-SNAPSHOT
+    ports:
+      - "8101:8101"
+    depends_on:
+      - discovery-service
+      - config-server
+      #      - postgres
+      - zipkin
+    networks:
+      - commissions-network
+    environment:
+      eureka.client.serviceURL.defaultZone: http://discovery-service:8761/eureka
+      eureka.instance.prefer-ip-address: "true"
+      spring.profiles.active: local,local-discovery
+      spring.zipkin.base-url: http://zipkin:9411
+      #      spring.datasource.url: jdbc:postgresql://postgres:5432/employees_service_db
+      spring.datasource.url: jdbc:postgresql://host.docker.internal:5432/employees_service_db
+      spring.config.import: "optional:configserver:http://config-server:8888"
+    restart: on-failure
+
+  commissions-service:
+    image: commissions-service:0.0.1-SNAPSHOT
+    ports:
+      - "8201:8201"
+    depends_on:
+      - discovery-service
+      - config-server
+      #      - mongo
+      - zipkin
+    networks:
+      - commissions-network
+    environment:
+      eureka.client.serviceURL.defaultZone: http://discovery-service:8761/eureka
+      eureka.instance.prefer-ip-address: "true"
+      #      spring.data.mongodb.host: mongo
+      spring.data.mongodb.host: host.docker.internal
+      spring.profiles.active: local,local-discovery
+      spring.zipkin.base-url: http://zipkin:9411
+      spring.config.import: "optional:configserver:http://config-server:8888"
+    restart: on-failure
+
+  gateway:
+    image: api-gateway:0.0.1-SNAPSHOT
+    ports:
+      - "8080:8080"
+    depends_on:
+      - discovery-service
+      - config-server
+      - employees_service
+      - commissions-service
+    networks:
+      - commissions-network
+    environment:
+      eureka.client.serviceURL.defaultZone: http://discovery-service:8761/eureka
+      eureka.instance.prefer-ip-address: "true"
+      spring.zipkin.base-url: http://zipkin:9411
+    restart: on-failure
+
+networks:
+  commissions-network:
