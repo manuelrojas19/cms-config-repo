@@ -24,13 +24,13 @@ services:
     networks:
       - commissions-network
   discovery-service:
-    image: discovery-service:0.0.1-SNAPSHOT
+    image: cms-discovery-server:1.0
     ports:
       - "8761:8761"
     networks:
       - commissions-network
   config-server:
-    image: config-server:0.0.1-SNAPSHOT
+    image: cms-config-server:1.0
     ports:
       - "8888:8888"
     depends_on:
@@ -41,7 +41,7 @@ services:
       eureka.client.serviceURL.defaultZone: http://discovery-service:8761/eureka
       eureka.instance.prefer-ip-address: "true"
   employees_service:
-    image: employees-service:0.0.1-SNAPSHOT
+    image: cms-employee-service:1.0
     ports:
       - "8101:8101"
     depends_on:
@@ -51,6 +51,8 @@ services:
       - zipkin
     networks:
       - commissions-network
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
     environment:
       eureka.client.serviceURL.defaultZone: http://discovery-service:8761/eureka
       eureka.instance.prefer-ip-address: "true"
@@ -62,7 +64,7 @@ services:
     restart: on-failure
 
   commissions-service:
-    image: commissions-service:0.0.1-SNAPSHOT
+    image: cms-commission-service:1.0
     ports:
       - "8201:8201"
     depends_on:
@@ -72,6 +74,8 @@ services:
       - zipkin
     networks:
       - commissions-network
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
     environment:
       eureka.client.serviceURL.defaultZone: http://discovery-service:8761/eureka
       eureka.instance.prefer-ip-address: "true"
@@ -83,7 +87,7 @@ services:
     restart: on-failure
 
   gateway:
-    image: api-gateway:0.0.1-SNAPSHOT
+    image: cms-api-gateway:1.0
     ports:
       - "8080:8080"
     depends_on:
