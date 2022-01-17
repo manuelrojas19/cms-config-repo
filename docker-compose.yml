@@ -1,43 +1,59 @@
 version: '3.9'
 services:
-  #  postgres:
-  #    image: postgres
-  #    restart: unless-stopped
-  #    ports:
-  #      - "5433:5432"
-  #    networks:
-  #      - commissions-network
-  #    environment:
-  #      POSTGRES_USER: postgres
-  #      POSTGRES_PASSWORD: postgres
-  #  mongo:
-  #    image: mongo
-  #    restart: unless-stopped
-  #    ports:
-  #      - "27888:27017"
-  #    networks:
-  #      - commissions-network
+  postgres:
+    image: postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    networks:
+      - commissions-network
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - /var/lib/postgresql/data/:/var/lib/postgresql/data/
+      - ./db:/docker-entrypoint-initdb.d/
+
+  mongo:
+    image: mongo
+    restart: unless-stopped
+    ports:
+      - "27888:27017"
+    volumes:
+      - /data/db:/data/db
+    networks:
+      - commissions-network
+
   zookeeper:
     image: wurstmeister/zookeeper
+    networks:
+      - commissions-network
+
   kafka:
     image: wurstmeister/kafka
-    ports:
-      - "9092:9092"
+    depends_on:
+      - zookeeper
+    networks:
+      - commissions-network
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ADVERTISED_PORT: 9092
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
   zipkin:
     image: openzipkin/zipkin
     ports:
       - "9411:9411"
     networks:
       - commissions-network
+
   discovery-service:
     image: cms/discovery-server
     ports:
       - "8761:8761"
     networks:
       - commissions-network
+
   config-server:
     image: cms/config-server
     ports:
@@ -49,12 +65,14 @@ services:
     environment:
       eureka.client.serviceURL.defaultZone: http://discovery-service:8761/eureka
       eureka.instance.prefer-ip-address: "true"
+
   auth-server:
     image: cms/auth-server
     ports:
       - "8000:8000"
     depends_on:
       - discovery-service
+      - kafka
       - config-server
       #      - postgres
       - zipkin
@@ -63,13 +81,14 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     environment:
-      spring.kafka.bootstrap-servers: host.docker.internal:9093
+      spring.kafka.bootstrap-servers: kafka:9092
       eureka.client.serviceURL.defaultZone: http://discovery-service:8761/eureka
       eureka.instance.prefer-ip-address: "true"
       spring.zipkin.base-url: http://zipkin:9411
-      #      spring.datasource.url: jdbc:postgresql://postgres:5432/employees_service_db
-      spring.datasource.url: jdbc:postgresql://host.docker.internal:5432/cms_auth_db
+      spring.datasource.url: jdbc:postgresql://postgres:5432/cms_auth_db
+    #      spring.datasource.url: jdbc:postgresql://host.docker.internal:5432/cms_auth_db
     restart: on-failure
+
   employees_service:
     image: cms/employee-service
     ports:
@@ -77,6 +96,7 @@ services:
     depends_on:
       - discovery-service
       - config-server
+      - kafka
       #      - postgres
       - zipkin
     networks:
@@ -84,12 +104,13 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     environment:
+      spring.kafka.bootstrap-servers: kafka:9092
       eureka.client.serviceURL.defaultZone: http://discovery-service:8761/eureka
       eureka.instance.prefer-ip-address: "true"
       spring.profiles.active: local,local-discovery
       spring.zipkin.base-url: http://zipkin:9411
-      #      spring.datasource.url: jdbc:postgresql://postgres:5432/employees_service_db
-      spring.datasource.url: jdbc:postgresql://host.docker.internal:5432/employees_service_db
+      spring.datasource.url: jdbc:postgresql://postgres:5432/employees_service_db
+      #      spring.datasource.url: jdbc:postgresql://host.docker.internal:5432/employees_service_db
       spring.config.import: "optional:configserver:http://config-server:8888"
     restart: on-failure
 
@@ -100,6 +121,7 @@ services:
     depends_on:
       - discovery-service
       - config-server
+      - kafka
       #      - mongo
       - zipkin
     networks:
@@ -107,10 +129,11 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     environment:
+      spring.kafka.bootstrap-servers: kafka:9092
       eureka.client.serviceURL.defaultZone: http://discovery-service:8761/eureka
       eureka.instance.prefer-ip-address: "true"
-      #      spring.data.mongodb.host: mongo
-      spring.data.mongodb.host: host.docker.internal
+      spring.data.mongodb.host: mongo
+      #      spring.data.mongodb.host: host.docker.internal
       spring.profiles.active: local,local-discovery
       spring.zipkin.base-url: http://zipkin:9411
       spring.config.import: "optional:configserver:http://config-server:8888"
@@ -119,7 +142,7 @@ services:
   gateway:
     image: cms/api-gateway
     ports:
-      - "8080:8080"
+      - "8090:8090"
     depends_on:
       - discovery-service
       - config-server
