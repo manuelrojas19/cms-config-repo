@@ -48,14 +48,14 @@ services:
       - commissions-network
 
   discovery-service:
-    image: cms/discovery-server
+    image: manuelrojas19/cms-discovery-server
     ports:
       - "8761:8761"
     networks:
       - commissions-network
 
   config-server:
-    image: cms/config-server
+    image: manuelrojas19/cms-config-server
     ports:
       - "8888:8888"
     depends_on:
@@ -67,7 +67,7 @@ services:
       eureka.instance.prefer-ip-address: "true"
 
   auth-server:
-    image: cms/auth-server
+    image: manuelrojas19/cms-api-gateway
     ports:
       - "8000:8000"
     depends_on:
@@ -90,7 +90,7 @@ services:
     restart: on-failure
 
   employees_service:
-    image: cms/employee-service
+    image: manuelrojas19/cms-employee-service
     ports:
       - "8101:8101"
     depends_on:
@@ -115,7 +115,7 @@ services:
     restart: on-failure
 
   commissions-service:
-    image: cms/commission-service
+    image: manuelrojas19/cms-commission-service
     ports:
       - "8201:8201"
     depends_on:
@@ -140,7 +140,7 @@ services:
     restart: on-failure
 
   gateway:
-    image: cms/api-gateway
+    image: cms-api-gateway
     ports:
       - "8090:8090"
     depends_on:
