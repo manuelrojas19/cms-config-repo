@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms-auth-service-app
+  labels:
+    app: cms-auth-service-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app : cms-auth-service-app
+  template:
+    metadata:
+      labels:
+        app: cms-auth-service-app
+    spec:
+      containers:
+        - name: cms-auth-service-app
+          image: manuelrojas19/cms-auth-server
+          command: [ "java","-Djava.security.egd=file:/dev/./urandom","-Dspring.profiles.active=local-k8s","-jar","/app/app.jar" ]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+          - name: SPRING_DATASOURCE_URL
+            value: jdbc:postgresql://${POSTGRES_HOST}:5432/postgres
+          - name: POSTGRES_USER
+            valueFrom:
+              configMapKeyRef:
+                name: postgres-config
+                key: postgres_user
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                name: postgres-config
+                key: postgres_password
+          - name: POSTGRES_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: hostname-config
+                key: postgres_host
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name:  cms-auth-service-svc
+spec:
+  selector:
+    app:  cms-auth-service-app
+  ports:
+    - port:  80
+      targetPort:  8000
