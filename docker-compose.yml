@@ -67,7 +67,7 @@ services:
       eureka.instance.prefer-ip-address: "true"
 
   auth-server:
-    image: manuelrojas19/cms-api-gateway
+    image: manuelrojas19/cms-auth-server
     ports:
       - "8000:8000"
     depends_on:
@@ -140,7 +140,7 @@ services:
     restart: on-failure
 
   gateway:
-    image: cms-api-gateway
+    image: manuelrojas19/cms-api-gateway
     ports:
       - "8090:8090"
     depends_on:
