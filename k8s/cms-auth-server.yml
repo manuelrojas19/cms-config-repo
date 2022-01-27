@@ -17,11 +17,13 @@ spec:
       containers:
         - name: cms-auth-service-app
           image: manuelrojas19/cms-auth-server
-          command: [ "java","-Djava.security.egd=file:/dev/./urandom","-Dspring.profiles.active=local-k8s","-jar","/app/app.jar" ]
+#          command: [ "java","-Djava.security.egd=file:/dev/./urandom","-Dspring.profiles.active=local-k8s","-jar","/app/app.jar" ]
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
           env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: local-k8s
           - name: SPRING_KAFKA_BOOTSTRAP-SERVERS
             value: kafka-service:9092
           - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
