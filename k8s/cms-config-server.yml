@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms-config-server-app
+  labels:
+    app: cms-config-server-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app : cms-config-server-app
+  template:
+    metadata:
+      labels:
+        app: cms-config-server-app
+    spec:
+      containers:
+        - name: cms-config-server-app
+          image: manuelrojas19/cms-config-server
+          command: [ "java","-Djava.security.egd=file:/dev/./urandom","-Dspring.profiles.active=local-k8s","-jar","/app/app.jar" ]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8888
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: cms-config-server-svc
+spec:
+  ports:
+  - port:  80
+    name: config-port
+    protocol: TCP
+  selector:
+    app: cms-config-server-app

@@ -22,8 +22,10 @@ spec:
           ports:
             - containerPort: 8000
           env:
-          - name: SPRING_DATASOURCE_URL
-            value: jdbc:postgresql://${POSTGRES_HOST}:5432/postgres
+          - name: SPRING_KAFKA_BOOTSTRAP-SERVERS
+            value: kafka-service:9092
+          - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+            value: kafka-service
           - name: POSTGRES_USER
             valueFrom:
               configMapKeyRef:
@@ -45,10 +47,11 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name:  cms-auth-service-svc
+  name: cms-auth-service-svc
 spec:
   selector:
     app:  cms-auth-service-app
   ports:
     - port:  80
       targetPort:  8000
+  type: LoadBalancer

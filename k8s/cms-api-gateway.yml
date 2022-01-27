@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms-api-gateway-app
+  labels:
+    app: cms-api-gateway-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app : cms-api-gateway-app
+  template:
+    metadata:
+      labels:
+        app: cms-api-gateway-app
+    spec:
+      containers:
+        - name: cms-api-gateway-app
+          image: manuelrojas19/cms-api-gateway
+          command: [ "java","-Djava.security.egd=file:/dev/./urandom","-Dspring.profiles.active=local-k8s","-jar","/app/app.jar" ]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8090
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: cms-api-gateway-svc
+spec:
+  selector:
+    app:  cms-api-gateway-app
+  ports:
+    - port:  80
+      targetPort:  8090
