@@ -1,0 +1,19 @@
+spring:
+  data:
+    mongodb:
+      host: ${MONGO_HOST}
+      database: commissions_service_db
+      port: 27017
+      auto-index-creation: true
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: eureka-0
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://eureka-0.eureka.default.svc.cluster.local:8761/eureka
+server:
+  port: 8201
+  forward-headers-strategy: framework
