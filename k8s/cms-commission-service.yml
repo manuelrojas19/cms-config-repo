@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms-commission-service-app
+  labels:
+    app: cms-commission-service-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app : cms-commission-service-app
+  template:
+    metadata:
+      labels:
+        app: cms-commission-service-app
+    spec:
+      containers:
+        - name: cms-commission-service-app
+          image: manuelrojas19/cms-commission-service
+          command: [ "java","-Djava.security.egd=file:/dev/./urandom","-Dspring.profiles.active=local-discovery,local-k8s","-jar","/app/app.jar" ]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8101
+          env:
+            - name: SPRING_CLOUD_CONFIG_URI
+              value: http://cms-config-server-svc:8888
+            - name: SPRING_KAFKA_BOOTSTRAP-SERVERS
+              value: kafka-service:9092
+                #- name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+                #value: kafka-service
+            - name: MONGO_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-hostname-config
+                  key: mongo_host
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: cms-commission-service-svc
+spec:
+  selector:
+    app:  cms-commission-service-app
+  ports:
+    - targetPort: 9092
+      port: 80
