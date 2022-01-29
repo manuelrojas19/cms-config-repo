@@ -17,11 +17,13 @@ spec:
       containers:
         - name: cms-api-gateway-app
           image: manuelrojas19/cms-api-gateway
-          command: [ "java","-Djava.security.egd=file:/dev/./urandom","-Dspring.profiles.active=local-k8s","-jar","/app/app.jar" ]
+          command: [ "java","-Djava.security.egd=file:/dev/./urandom","-Dspring.profiles.active=local-discovery,local-k8s","-jar","/app/app.jar" ]
           imagePullPolicy: Always
           ports:
             - containerPort: 8090
-
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: local-k8s
 ---
 
 kind: Service

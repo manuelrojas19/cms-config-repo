@@ -47,17 +47,6 @@ services:
     networks:
       - commissions-network
 
-  rabbitmq:
-    image: rabbitmq:3.8-management-alpine
-    environment:
-      - RABBITMQ_DEFAULT_USER=rabbitmq
-      - RABBITMQ_DEFAULT_PASS=rabbitmq
-    ports:
-      # AMQP protocol port
-      - '5672:5672'
-      # HTTP management UI
-      - '15672:15672'
-
   discovery-service:
     image: manuelrojas19/cms-discovery-server
     ports:

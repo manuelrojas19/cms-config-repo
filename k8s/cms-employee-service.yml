@@ -17,19 +17,17 @@ spec:
       containers:
         - name: cms-employee-service-app
           image: manuelrojas19/cms-employee-service
-#          command: [ "java","-Djava.security.egd=file:/dev/./urandom","-Dspring.profiles.active=local-discovery,local-k8s","-jar","/app/app.jar" ]
+          command: [ "java","-Djava.security.egd=file:/dev/./urandom","-Dspring.profiles.active=local-discovery,local-k8s","-jar","/app/app.jar" ]
           imagePullPolicy: Always
           ports:
             - containerPort: 8101
           env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: local-k8s
             - name: SPRING_CLOUD_CONFIG_URI
               value: http://cms-config-server-svc:8888
             - name: SPRING_KAFKA_BOOTSTRAP-SERVERS
               value: kafka-service:9092
-            - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
-              value: kafka-service
+                #- name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+                #value: kafka-service
             - name: POSTGRES_USER
               valueFrom:
                 configMapKeyRef:
@@ -43,7 +41,7 @@ spec:
             - name: POSTGRES_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: hostname-config
+                  name: postgres-hostname-config
                   key: postgres_host
 
 ---
@@ -54,6 +52,7 @@ metadata:
   name: cms-employee-service-svc
 spec:
   ports:
-    - port:  80
+    - targetPort:  8101
+      port: 80
   selector:
     app:  cms-employee-service-app
