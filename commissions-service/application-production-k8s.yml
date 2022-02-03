@@ -1,15 +1,12 @@
 spring:
+  application:
+    name: commissions-service
   data:
     mongodb:
       host: ${MONGO_HOST}
       database: commissions_service_db
       port: 27017
       auto-index-creation: true
-  cloud:
-    config:
-      enabled: false
-      discovery:
-        enabled: false
     stream:
       function:
         definition: registrationEventConsumer
@@ -28,4 +25,3 @@ eureka:
 server:
   port: 8201
   forward-headers-strategy: framework
-
