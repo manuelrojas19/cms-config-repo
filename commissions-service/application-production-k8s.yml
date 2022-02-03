@@ -7,12 +7,18 @@ spring:
       database: commissions_service_db
       port: 27017
       auto-index-creation: true
+  cloud:
     stream:
       function:
         definition: registrationEventConsumer
       bindings:
         registrationEventConsumer-in-0:
           destination: registration-event
+  zipkin:
+    base-url: http://zipkin:9411
+  kafka:
+    consumer:
+      group-id: commissions-service
 eureka:
   instance:
     prefer-ip-address: true

@@ -1,4 +1,9 @@
 spring:
+  application:
+    name: commissions-service
+  kafka:
+    consumer:
+      group-id: commission-service
   data:
     mongodb:
       host: ${MONGO_HOST}
