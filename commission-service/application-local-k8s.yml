@@ -1,9 +1,4 @@
 spring:
-  application:
-    name: commissions-service
-  kafka:
-    consumer:
-      group-id: commission-service
   data:
     mongodb:
       host: ${MONGO_HOST}
@@ -21,6 +16,11 @@ spring:
       bindings:
         registrationEventConsumer-in-0:
           destination: registration-event
+  kafka:
+    consumer:
+      group-id: commission-service
+  zipkin:
+    base-url: http://zipkin:9411
 eureka:
   instance:
     prefer-ip-address: true
