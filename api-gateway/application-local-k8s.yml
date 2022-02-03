@@ -1,8 +1,4 @@
 spring:
-  main:
-    web-application-type: reactive
-  application:
-    name: api-gateway
   zipkin:
     base-url: zipkin:9411
   cloud:
