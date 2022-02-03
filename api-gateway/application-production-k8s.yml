@@ -28,6 +28,8 @@ management:
   endpoints.web.exposure.include: gateway
 server:
   port: 8090
+cms:
+  validate-token-uri: http://auth-server/api/v1/auth/validate_token;
 eureka:
   instance:
     prefer-ip-address: true
