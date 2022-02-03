@@ -1,6 +1,4 @@
 spring:
-  application:
-    name: employees-service
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${POSTGRES_HOST}:5432/employees_service_db
@@ -43,4 +41,3 @@ server:
 feign:
   circuitbreaker:
     enabled: true
-
