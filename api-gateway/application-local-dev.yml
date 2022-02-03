@@ -33,6 +33,7 @@ eureka:
     fetch-registry: true
     register-with-eureka: true
 cms:
+  authentication:
     validate-token-uri: http://auth-server/api/v1/auth/validate_token;
 server:
   port: 8090
